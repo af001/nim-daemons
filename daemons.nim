@@ -93,7 +93,7 @@ elif defined(windows):
     proc getEnvironmentVariableW(lpName, lpValue: WideCString, nSize: int32): int32 {.
         stdcall, dynlib: "kernel32", importc: "GetEnvironmentVariableW".}
 
-    proc daemonize*(pidfile: string, body: typed): void =
+    template daemonize*(pidfile: string, body: typed): void =
         var
             si: STARTUPINFO
             pi: PROCESS_INFORMATION
