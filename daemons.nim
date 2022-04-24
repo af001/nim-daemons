@@ -115,7 +115,7 @@ elif defined(windows):
                                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, Handle(0))
 
             if handle == INVALID_HANDLE_VALUE:
-                return -1
+                raise newException(IOError, "Invalid handle")
 
             si.hStdInput = handle
             si.hStdOutput = handle
@@ -123,13 +123,13 @@ elif defined(windows):
 
             if setEnvironmentVariableW(newWideCString(DaemonEnvVariable),
                                         newWideCString("true")) == 0:
-                return -1
+                raise newException(IOError, "Error set environment variable")
             var flags = CREATE_NEW_PROCESS_GROUP or DETACHED_PROCESS or
                         CREATE_UNICODE_ENVIRONMENT
             res = winlean.createProcessW(nil, cmdLineW, nil, nil, 1, flags, nil,
                                         nil, si, pi)
             if res == 0:
-                return -1
+                raise newException(IOError, "Create process failed")
             else:
                 writeFile(pidfile, $pi.dwProcessId)
 
