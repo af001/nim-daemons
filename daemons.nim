@@ -131,7 +131,7 @@ elif defined(windows):
                 raise newException(IOError, "Create process failed")
             else:
                 writeFile(pidfile, $pi.dwProcessId)
-            result = pi.dwProcessId
+
             body
 
 
