@@ -92,7 +92,7 @@ elif defined(windows):
     proc getEnvironmentVariableW(lpName, lpValue: WideCString, nSize: int32): int32 {.
         stdcall, dynlib: "kernel32", importc: "GetEnvironmentVariableW".}
 
-    template daemonize*(pidfile: string = "", body: typed): void =
+    template daemonize*(pidfile: string = "", body: untyped): void =
         var
             si: STARTUPINFO
             pi: PROCESS_INFORMATION
@@ -103,7 +103,7 @@ elif defined(windows):
         var cmdLineW = getCommandLineW()
         res = getEnvironmentVariableW(newWideCString(DaemonEnvVariable), cast[WideCString](addr evar[0]), 16)
         if res > 0:
-            quit(QuitSuccess)
+            raise newException(IOError, "Error get environment variable")
         else:
             sa.nLength = int32(sizeof(SECURITY_ATTRIBUTES))
             sa.bInheritHandle = 1'i32
@@ -128,12 +128,11 @@ elif defined(windows):
             res = winlean.createProcessW(nil, cmdLineW, nil, nil, 1, flags, nil,
                                         nil, si, pi)
             
-            echo res
             if res == 0:
                 raise newException(IOError, "Create process failed")
             else:
-                echo "writing pidfile"
                 writeFile(pidfile, $pi.dwProcessId)
+                echo $pi.dwProcessId
 
             body
 
