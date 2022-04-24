@@ -104,7 +104,7 @@ elif defined(windows):
         var cmdLineW = getCommandLineW()
         res = getEnvironmentVariableW(newWideCString(DaemonEnvVariable), cast[WideCString](addr evar[0]), 16)
         if res > 0:
-            result = 0
+            discard
         else:
             sa.nLength = int32(sizeof(SECURITY_ATTRIBUTES))
             sa.bInheritHandle = 1'i32
