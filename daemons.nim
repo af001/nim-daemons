@@ -16,6 +16,8 @@ when defined(posix):
         pid: Pid
         pidFileInner: string
         fi, fo, fe: File
+        si, so, se: string = "/dev/null"
+        cd: string = "/"
 
     proc c_signal(sig: cint, handler: proc (a: cint) {.noconv.}) {.importc: "signal", header: "<signal.h>".}
 
@@ -27,7 +29,7 @@ when defined(posix):
 
         quit(QuitSuccess)
 
-    template daemonize*(pidfile, si, so, se, cd: string, body: typed): void =
+    template daemonize*(pidfile, body: typed): void =
         ## deamonizer
         ##
         ## pidfile: path to file where pid will be stored
@@ -82,6 +84,7 @@ when defined(posix):
 
 elif defined(windows):
     import winlean, os, strutils
+
     const
         DaemonEnvVariable = "NIM_DAEMONIZE"
         CREATE_NEW_PROCESS_GROUP = 0x00000200'i32
@@ -90,7 +93,7 @@ elif defined(windows):
     proc getEnvironmentVariableW(lpName, lpValue: WideCString, nSize: int32): int32 {.
         stdcall, dynlib: "kernel32", importc: "GetEnvironmentVariableW".}
 
-    proc daemonize*(pidfile: string = ""): int =
+    proc daemonize*(pidfile: string, body: typed): void =
         var
             si: STARTUPINFO
             pi: PROCESS_INFORMATION
@@ -128,9 +131,9 @@ elif defined(windows):
             if res == 0:
                 return -1
             else:
-                if len(pidfile) > 0:
-                    writeFile(pidfile, $pi.dwProcessId)
-            result = pi.dwProcessId
+                writeFile(pidfile, $pi.dwProcessId)
+
+            body
 
 
 when isMainModule:
@@ -144,5 +147,5 @@ when isMainModule:
         daemonize("%TEMP%\\daemonize.pid"):
             main()
     elif defined posix:
-        daemonize("/tmp/daemonize.pid", "/dev/null", "/tmp/daemonize.out", "/tmp/daemonize.err", "/"):
+        daemonize("/tmp/daemonize.pid"):
             main()
