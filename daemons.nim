@@ -1,4 +1,3 @@
-
 ## This library makes your code run as a daemon process on Unix-like systems.
 import os except sleep
 
@@ -104,7 +103,7 @@ elif defined(windows):
         var cmdLineW = getCommandLineW()
         res = getEnvironmentVariableW(newWideCString(DaemonEnvVariable), cast[WideCString](addr evar[0]), 16)
         if res > 0:
-            raise newException(IOError, "Error getting environment variable")
+            quit(QuitSuccess)
         else:
             sa.nLength = int32(sizeof(SECURITY_ATTRIBUTES))
             sa.bInheritHandle = 1'i32
@@ -132,7 +131,7 @@ elif defined(windows):
                 raise newException(IOError, "Create process failed")
             else:
                 writeFile(pidfile, $pi.dwProcessId)
-
+            result = pi.dwProcessId
             body
 
 
