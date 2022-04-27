@@ -102,8 +102,11 @@ elif defined(windows):
 
         var cmdLineW = getCommandLineW()
         res = getEnvironmentVariableW(newWideCString(DaemonEnvVariable), cast[WideCString](addr evar[0]), 16)
+
+        echo res
         if res > 0:
-            raise newException(IOError, "Error get environment variable")
+            discard
+            #raise newException(IOError, "Error getting environment variable")
         else:
             sa.nLength = int32(sizeof(SECURITY_ATTRIBUTES))
             sa.bInheritHandle = 1'i32
@@ -128,25 +131,6 @@ elif defined(windows):
             res = winlean.createProcessW(nil, cmdLineW, nil, nil, 1, flags, nil,
                                         nil, si, pi)
             
-            if res == 0:
-                raise newException(IOError, "Create process failed")
-            else:
+            if res > 0:
                 writeFile(pidfile, $pi.dwProcessId)
-                echo $pi.dwProcessId
-
-            body
-
-
-when isMainModule:
-    proc main() =
-        var i = 0
-        while true:
-            i.inc()
-            echo i
-            discard sleep(1)
-    when defined windows:
-        daemonize(getTempDir() / "daemonize.pid"):
-            main()
-    elif defined posix:
-        daemonize(getTempDir() / "daemonize.pid"):
-            main()
+                body
